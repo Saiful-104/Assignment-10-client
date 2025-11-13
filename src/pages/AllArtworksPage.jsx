@@ -1,55 +1,60 @@
+// AllArtworksPage.js
+
 import React, { useState, useEffect } from 'react';
 import { Search, Eye, Heart } from 'lucide-react';
-import { Link } from 'react-router';
+// This import is likely 'react-router-dom', not 'react-router'
+import { Link } from 'react-router-dom'; 
 
 export default function AllArtworksPage() {
-  const dummyArtworks = [
-    {
-      id: 1,
-      imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5',
-      title: 'Sunset Dreams',
-      artistName: 'Sarah Anderson',
-      category: 'painting',
-      likes: 245,
-    },
-    {
-      id: 2,
-      imageUrl: 'https://images.unsplash.com/photo-1561214115-f2f134cc4912',
-      title: 'Urban Chaos',
-      artistName: 'Michael Chen',
-      category: 'digital art',
-      likes: 189,
-    },
-    {
-      id: 3,
-      imageUrl: 'https://images.unsplash.com/photo-1513364776144-60967b0f800f',
-      title: 'Mountain Serenity',
-      artistName: 'Emma Williams',
-      category: 'photography',
-      likes: 312,
-    },
-    {
-      id: 4,
-      imageUrl: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968',
-      title: 'Abstract Emotions',
-      artistName: 'Sarah Anderson',
-      category: 'mixed media',
-      likes: 167,
-    }
-  ];
-
+  // We no longer need dummyArtworks
+  
   const [artworks, setArtworks] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  useEffect(() => {
-    // Simulate fetching public artworks from DB
-    setArtworks(dummyArtworks);
-  }, []);
+  // Add loading and error states for real data fetching
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  useEffect(() => {
+    // This function fetches data from YOUR backend
+    const fetchArtworks = async () => {
+      try {
+        // 1. Fetch from your backend's endpoint
+        const response = await fetch('http://localhost:3000/artworks');
+
+        if (!response.ok) {
+          throw new Error('Data could not be fetched!');
+        }
+        
+        const data = await response.json();
+        
+        setArtworks(data); // 2. Set the data from your API
+        setError(null);
+      } catch (err) {
+        setError(err.message); // 3. Set error if fetching fails
+        console.error("Failed to fetch artworks:", err);
+      } finally {
+        setIsLoading(false); // 4. Stop loading (on success or error)
+      }
+    };
+
+    fetchArtworks(); // Call the function
+  }, []); // The empty array [] means this runs once when the component loads
+
+  // This filter logic now runs on the REAL data from your API
   const filteredArtworks = artworks.filter(art =>
     art.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     art.artistName.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  // 5. Add loading and error messages
+  if (isLoading) {
+    return <div className="min-h-screen flex justify-center items-center"><p>Loading artworks...</p></div>;
+  }
+
+  if (error) {
+    return <div className="min-h-screen flex justify-center items-center"><p>Error: {error}</p></div>;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -75,7 +80,8 @@ export default function AllArtworksPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredArtworks.map(art => (
-              <div key={art.id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              // 6. Use art._id (from MongoDB) as the key
+              <div key={art._id} className="bg-white rounded-2xl shadow-lg overflow-hidden">
                 <img
                   src={art.imageUrl}
                   alt={art.title}
@@ -93,8 +99,9 @@ export default function AllArtworksPage() {
                     <span>{art.likes} likes</span>
                   </div>
                   {/* View Details Button */}
+                  {/* 7. Link to the specific detail page using art._id */}
                   <Link
-                    to="/details"
+                  to={`/details/${art._id}`}
                     className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2 rounded-lg flex items-center gap-2"
                   >
                     <Eye className="w-4 h-4" /> View Details

@@ -12,7 +12,7 @@ import {
 import { auth } from '../firebase/firebaseConfig';
 import { toast } from 'react-hot-toast';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 export const useAuth = () => {
   return useContext(AuthContext);
@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const loginWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+        setLoading(true)
     try {
       await signInWithPopup(auth, provider);
       toast.success('Successfully logged in!');
@@ -42,6 +43,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const loginWithEmail = async (email, password) => {
+    setLoading(true)
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast.success('Successfully logged in!');
@@ -51,6 +53,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signupWithEmail = async (name, email, password, photoURL) => {
+    setLoading(true)
     try {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(result.user, {
@@ -64,6 +67,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    setLoading(true)
     signOut(auth);
     toast.success('Logged out successfully!');
   };
@@ -97,12 +101,13 @@ export const AuthProvider = ({ children }) => {
     signupWithEmail,
     logout,
     updateUserProfile,
-    resetPassword
+    resetPassword,
+    loading,
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 };
