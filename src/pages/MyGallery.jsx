@@ -1,129 +1,225 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-import LoadingSpinner from "../components/LoadingSpinner";
-import { getMyArtworks, deleteArtwork } from "../utils/api";
-import toast from "react-hot-toast";
-import Swal from "sweetalert2";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
+import React, { useState, useEffect } from 'react';
+import { Edit2, Trash2, X, Check } from 'lucide-react';
 
-const MyGallery = () => {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+export default function MyGalleryPage() {
+  // Logged-in user
+  const currentUser = {
+    id: 1,
+    name: "Sarah Anderson",
+    email: "sarah.anderson@email.com"
+  };
+
+  // Initial artworks
+  const initialArtworks = [
+    {
+      id: 1,
+      imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5',
+      title: 'Sunset Dreams',
+      category: 'painting',
+      medium: 'Oil on Canvas',
+      description: 'A vibrant sunset over the ocean',
+      dimensions: '36 x 48 inches',
+      price: '1200',
+      visibility: 'public',
+      userName: 'Sarah Anderson',
+      userEmail: 'sarah.anderson@email.com',
+      likes: 245,
+      views: 1823
+    },
+    {
+      id: 2,
+      imageUrl: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968',
+      title: 'Abstract Emotions',
+      category: 'mixed media',
+      medium: 'Acrylic and Collage',
+      description: 'Exploring human emotions through color',
+      dimensions: '24 x 30 inches',
+      price: '950',
+      visibility: 'public',
+      userName: 'Sarah Anderson',
+      userEmail: 'sarah.anderson@email.com',
+      likes: 167,
+      views: 892
+    }
+  ];
+
   const [artworks, setArtworks] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [selectedArtwork, setSelectedArtwork] = useState(null);
+  const [showUpdateModal, setShowUpdateModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '' });
+  const [formData, setFormData] = useState({
+    imageUrl: '',
+    title: '',
+    category: '',
+    medium: '',
+    description: '',
+    dimensions: '',
+    price: '',
+    visibility: 'public'
+  });
 
+  // Load artworks
   useEffect(() => {
-    const fetchArtworks = async () => {
-      try {
-        const data = await getMyArtworks();
-        setArtworks(data);
-      } catch (error) {
-        toast.error("Failed to fetch your artworks");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchArtworks();
+    const saved = localStorage.getItem('userArtworks');
+    if (saved) setArtworks(JSON.parse(saved));
+    else {
+      setArtworks(initialArtworks);
+      localStorage.setItem('userArtworks', JSON.stringify(initialArtworks));
+    }
   }, []);
 
-  const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: "Are you sure?",
-      text: "You won't be able to revert this!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
-    });
+  // Persist
+  useEffect(() => {
+    localStorage.setItem('userArtworks', JSON.stringify(artworks));
+  }, [artworks]);
 
-    if (result.isConfirmed) {
-      try {
-        await deleteArtwork(id);
-        setArtworks(artworks.filter(artwork => artwork._id !== id));
-        toast.success("Artwork deleted successfully");
-      } catch (error) {
-        toast.error("Failed to delete artwork");
-      }
-    }
+  const openUpdateModal = (art) => {
+    setSelectedArtwork(art);
+    setFormData({ ...art });
+    setShowUpdateModal(true);
   };
 
-  const handleEdit = (id) => {
-    navigate(`/update-artwork/${id}`);
+  const closeUpdateModal = () => {
+    setShowUpdateModal(false);
+    setSelectedArtwork(null);
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
+  const handleUpdate = () => {
+    setArtworks(prev =>
+      prev.map(a => (a.id === selectedArtwork.id ? { ...selectedArtwork, ...formData } : a))
+    );
+    showToastNotification('Artwork updated successfully!');
+    closeUpdateModal();
+  };
+
+  const openDeleteModal = (art) => {
+    setSelectedArtwork(art);
+    setShowDeleteModal(true);
+  };
+
+  const closeDeleteModal = () => {
+    setShowDeleteModal(false);
+    setSelectedArtwork(null);
+  };
+
+  const handleDelete = () => {
+    setArtworks(prev => prev.filter(a => a.id !== selectedArtwork.id));
+    showToastNotification('Artwork deleted successfully!');
+    closeDeleteModal();
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const showToastNotification = (message) => {
+    setToast({ show: true, message });
+    setTimeout(() => setToast({ show: false, message: '' }), 3000);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col">
-  
-      
-      <div className="flex-grow container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-4xl font-bold">My Gallery</h1>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate("/add-artwork")}
-          >
-            Add New Artwork
-          </button>
-        </div>
-        
-        {artworks.length > 0 ? (
+    <div className="min-h-screen bg-gray-50 py-10 px-4">
+      <div className="max-w-6xl mx-auto">
+        <h1 className="text-3xl text-gray-800 font-bold mb-6">My Gallery</h1>
+
+        {artworks.length === 0 ? (
+          <p className="text-gray-700">No artworks yet.</p>
+        ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {artworks.map((artwork) => (
-              <div key={artwork._id} className="card bg-base-100 shadow-xl">
-                <figure className="h-64">
-                  <img
-                    src={artwork.imageUrl}
-                    alt={artwork.title}
-                    className="w-full h-full object-cover"
-                  />
-                </figure>
-                <div className="card-body">
-                  <h2 className="card-title">{artwork.title}</h2>
-                  <div className="badge badge-outline">{artwork.category}</div>
-                  <div className="badge badge-outline">{artwork.medium}</div>
-                  <div className="card-actions justify-end">
+            {artworks.map(art => (
+              <div key={art.id} className="bg-white rounded-xl shadow overflow-hidden">
+                <img src={art.imageUrl} alt={art.title} className="w-full h-64 object-cover" />
+                <div className="p-4">
+                  <h3 className="text-lg font-semibold text-gray-700">{art.title}</h3>
+                  <p className="text-sm text-gray-600">{art.medium}</p>
+                  <div className="flex justify-between mt-3">
                     <button
-                      className="btn btn-outline btn-primary btn-sm"
-                      onClick={() => handleEdit(artwork._id)}
+                      onClick={() => openUpdateModal(art)}
+                      className="flex-1 py-2 mr-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition flex items-center justify-center gap-2"
                     >
-                      <PencilIcon className="w-4 h-4" />
-                      Edit
+                      <Edit2 className="w-4 h-4" /> Update
                     </button>
                     <button
-                      className="btn btn-outline btn-error btn-sm"
-                      onClick={() => handleDelete(artwork._id)}
+                      onClick={() => openDeleteModal(art)}
+                      className="flex-1 py-2 ml-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition flex items-center justify-center gap-2"
                     >
-                      <TrashIcon className="w-4 h-4" />
-                      Delete
+                      <Trash2 className="w-4 h-4" /> Delete
                     </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-        ) : (
-          <div className="text-center py-16">
-            <h3 className="text-2xl font-semibold mb-4">You haven't added any artworks yet</h3>
-            <button
-              className="btn btn-primary"
-              onClick={() => navigate("/add-artwork")}
-            >
-              Add Your First Artwork
-            </button>
+        )}
+
+        {/* Update Modal */}
+        {showUpdateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white text-black rounded-2xl max-w-xl w-full p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold">Update Artwork</h2>
+                <button onClick={closeUpdateModal}><X className="w-6 h-6" /></button>
+              </div>
+              <div className="space-y-4">
+                <input
+                  type="text"
+                  name="title"
+                  value={formData.title}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Title"
+                />
+                <input
+                  type="text"
+                  name="medium"
+                  value={formData.medium}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Medium"
+                />
+                <input
+                  type="text"
+                  name="price"
+                  value={formData.price}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border rounded-lg"
+                  placeholder="Price"
+                />
+              </div>
+              <div className="flex gap-3 mt-4">
+                <button onClick={closeUpdateModal} className="flex-1 py-2 rounded-lg bg-gray-200">Cancel</button>
+                <button onClick={handleUpdate} className="flex-1 py-2 rounded-lg bg-blue-600 text-white">Update</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Modal */}
+        {showDeleteModal && selectedArtwork && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white text-orange-950 rounded-2xl max-w-md w-full p-6 text-center">
+              <h2 className="text-2xl font-bold mb-2">Delete Artwork?</h2>
+              <p className="text-gray-600 mb-4">Are you sure you want to delete "{selectedArtwork.title}"?</p>
+              <div className="flex gap-3">
+                <button onClick={closeDeleteModal} className="flex-1 py-2 rounded-lg bg-gray-200">Cancel</button>
+                <button onClick={handleDelete} className="flex-1 py-2 rounded-lg bg-red-600 text-white">Delete</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Toast */}
+        {toast.show && (
+          <div className="fixed bottom-8 right-8 bg-green-500 text-white px-6 py-3 rounded-xl shadow-lg">
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5" />
+              <span>{toast.message}</span>
+            </div>
           </div>
         )}
       </div>
-      
-   
     </div>
   );
-};
-
-export default MyGallery;
+}

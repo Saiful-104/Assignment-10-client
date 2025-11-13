@@ -1,214 +1,179 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-
-import toast from "react-hot-toast";
-import { FcGoogle } from "react-icons/fc";
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const Register = () => {
-  const { signUp, signInWithGoogle } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [photoURL, setPhotoURL] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [photoURL, setPhotoURL] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState('');
   const [loading, setLoading] = useState(false);
+  const { signupWithEmail, loginWithGoogle, currentUser } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (currentUser) {
+      navigate('/');
+    }
+  }, [currentUser, navigate]);
+
   const validatePassword = (password) => {
-    // Password must contain uppercase, lowercase letter, and minimum 6 characters
-    const regex = /^(?=.*[a-z])(?=.*[A-Z]).{6,}$/;
-    return regex.test(password);
+    if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    }
+    if (!/[A-Z]/.test(password)) {
+      return 'Password must contain at least one uppercase letter';
+    }
+    if (!/[a-z]/.test(password)) {
+      return 'Password must contain at least one lowercase letter';
+    }
+    return '';
+  };
+
+  const handlePasswordChange = (e) => {
+    const newPassword = e.target.value;
+    setPassword(newPassword);
+    setPasswordError(validatePassword(newPassword));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (password !== confirmPassword) {
-      return toast.error("Passwords do not match");
-    }
-    
-    if (!validatePassword(password)) {
-      return toast.error(
-        "Password must contain at least one uppercase letter, one lowercase letter, and be at least 6 characters long"
-      );
+    const error = validatePassword(password);
+    if (error) {
+      setPasswordError(error);
+      return;
     }
     
     setLoading(true);
-
+    
     try {
-      const result = await signUp(email, password, name);
-      const token = await result.user.getIdToken();
-      localStorage.setItem("token", token);
-      
-      // Update user profile with photoURL if provided
-      if (photoURL) {
-        // You might want to update this in your backend
-      }
-      
-      toast.success("Account created successfully");
-      navigate("/");
+      await signupWithEmail(name, email, password, photoURL);
+
+      toast.success("Registration successful!")
+      navigate('/');
     } catch (error) {
-      toast.error(error.message);
+        toast.error(error.message); 
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignUp = async () => {
+  const handleGoogleSignup = async () => {
     setLoading(true);
-
+    
     try {
-      const result = await signInWithGoogle();
-      const token = await result.user.getIdToken();
-      localStorage.setItem("token", token);
-      
-      toast.success("Account created successfully");
-      navigate("/");
+      await loginWithGoogle();
+        toast.success("Google signup successful!");
+      navigate('/');
     } catch (error) {
-      toast.error(error.message);
+        toast.error(error.message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-    
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Create your account
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{" "}
-              <Link
-                to="/login"
-                className="font-medium text-primary hover:text-primary-focus"
-              >
-                sign in to your existing account
-              </Link>
-            </p>
-          </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                  Full Name
-                </label>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  placeholder="Your full name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="email-address" className="block text-sm font-medium text-gray-700">
-                  Email address
-                </label>
-                <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="photoURL" className="block text-sm font-medium text-gray-700">
-                  Photo URL (optional)
-                </label>
-                <input
-                  id="photoURL"
-                  name="photoURL"
-                  type="url"
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  placeholder="https://example.com/your-photo.jpg"
-                  value={photoURL}
-                  onChange={(e) => setPhotoURL(e.target.value)}
-                />
-              </div>
-              
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  required
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <p className="mt-1 text-xs text-gray-500">
-                  Must contain uppercase, lowercase letter, and minimum 6 characters
-                </p>
-              </div>
-              
-              <div>
-                <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700">
-                  Confirm Password
-                </label>
-                <input
-                  id="confirm-password"
-                  name="confirm-password"
-                  type="password"
-                  required
-                  className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                  placeholder="Confirm password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
+    <div className="hero min-h-screen bg-base-200">
+      <div className="hero-content flex-col lg:flex-row-reverse">
+        <div className="text-center lg:text-left">
+          <h1 className="text-5xl font-bold">Sign up now!</h1>
+          <p className="py-6">Create your SkillSwap account to start learning or teaching new skills.</p>
+        </div>
+        <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+          <form className="card-body" onSubmit={handleSubmit}>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Name</span>
+              </label>
+              <input 
+                type="text" 
+                placeholder="name" 
+                className="input input-bordered" 
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required 
+              />
             </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                {loading ? "Creating account..." : "Create account"}
-              </button>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input 
+                type="email" 
+                placeholder="email" 
+                className="input input-bordered" 
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required 
+              />
             </div>
-
-            <div className="mt-6">
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Photo URL (optional)</span>
+              </label>
+              <input 
+                type="url" 
+                placeholder="photo URL" 
+                className="input input-bordered" 
+                value={photoURL}
+                onChange={(e) => setPhotoURL(e.target.value)}
+              />
+            </div>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
               <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-6">
-                <button
+                <input 
+                  type={showPassword ? "text" : "password"} 
+                  placeholder="password" 
+                  className="input input-bordered w-full pr-10" 
+                  value={password}
+                  onChange={handlePasswordChange}
+                  required 
+                />
+                <button 
                   type="button"
-                  onClick={handleGoogleSignUp}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  <FcGoogle className="h-5 w-5 mr-2" />
-                  {loading ? "Creating account..." : "Sign up with Google"}
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-500" />
+                  )}
                 </button>
               </div>
+              {passwordError && (
+                <label className="label">
+                  <span className="label-text-alt text-error">{passwordError}</span>
+                </label>
+              )}
             </div>
+            <div className="form-control mt-6">
+              <button className="btn btn-primary" disabled={loading || passwordError}>
+                {loading ? <span className="loading loading-spinner"></span> : 'Sign up'}
+              </button>
+            </div>
+            <div className="divider">OR</div>
+            <div className="form-control">
+              <button 
+                type="button" 
+                className="btn btn-outline btn-primary"
+                onClick={handleGoogleSignup}
+                disabled={loading}
+              >
+                {loading ? <span className="loading loading-spinner"></span> : 'Sign up with Google'}
+              </button>
+            </div>
+            <p className="text-center mt-2">
+              Already have an account? <Link to="/login" className="link link-primary">Login</Link>
+            </p>
           </form>
         </div>
       </div>

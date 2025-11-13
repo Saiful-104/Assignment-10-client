@@ -1,153 +1,132 @@
-import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../contexts/AuthContext";
-
-import toast from "react-hot-toast";
-import { FcGoogle } from "react-icons/fc";
+// src/pages/Login.jsx
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { toast } from 'react-hot-toast';
+import { EyeIcon, EyeSlashIcon } from '@heroicons/react/24/outline';
 
 const Login = () => {
-  const { signIn, signInWithGoogle } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  const { loginWithEmail, loginWithGoogle, currentUser } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const from = location.state?.from?.pathname || "/";
-
+  // Redirect if already logged in
   useEffect(() => {
-    // Get token from URL if redirected from Google login
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-    
-    if (token) {
-      localStorage.setItem("token", token);
-      navigate(from, { replace: true });
+    if (currentUser) {
+      navigate('/');
     }
-  }, [navigate, from]);
+  }, [currentUser, navigate]);
 
+  // Email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
     try {
-      const result = await signIn(email, password);
-      const token = await result.user.getIdToken();
-      localStorage.setItem("token", token);
-      
-      toast.success("Logged in successfully");
-      navigate(from, { replace: true });
+      await loginWithEmail(email, password);
+      toast.success('Logged in successfully!');
+      navigate('/');
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error('Login failed. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  // Google login
+  const handleGoogleLogin = async () => {
     setLoading(true);
-
     try {
-      const result = await signInWithGoogle();
-      const token = await result.user.getIdToken();
-      localStorage.setItem("token", token);
-      
-      toast.success("Logged in successfully");
-      navigate(from, { replace: true });
+      await loginWithGoogle();
+      toast.success('Logged in successfully!');
+      navigate('/');
     } catch (error) {
-      toast.error(error.message);
+      console.error(error);
+      toast.error('Google login failed.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-     
-      <div className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8">
-          <div>
-            <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-              Sign in to your account
-            </h2>
-            <p className="mt-2 text-center text-sm text-gray-600">
-              Or{" "}
-              <Link
-                to="/register"
-                className="font-medium text-primary hover:text-primary-focus"
-              >
-                create a new account
-              </Link>
-            </p>
-          </div>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <label htmlFor="email-address" className="sr-only">
-                  Email address
-                </label>
+    <div className="hero min-h-screen bg-base-200">
+      <div className="hero-content flex-col lg:flex-row-reverse">
+        <div className="text-center lg:text-left">
+          <h1 className="text-5xl font-bold">Login to your account</h1>
+          <p className="py-6">Enter your credentials to continue learning or teaching.</p>
+        </div>
+        <div className="card flex-shrink-0 w-full max-w-sm shadow-2xl bg-base-100">
+          <form className="card-body" onSubmit={handleSubmit}>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                placeholder="email"
+                className="input input-bordered"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Password</span>
+              </label>
+              <div className="relative">
                 <input
-                  id="email-address"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div>
-                <label htmlFor="password" className="sr-only">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  autoComplete="current-password"
-                  required
-                  className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm"
-                  placeholder="Password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="password"
+                  className="input input-bordered w-full pr-10"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
                 />
-              </div>
-            </div>
-
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-focus focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-              >
-                {loading ? "Signing in..." : "Sign in"}
-              </button>
-            </div>
-
-            <div className="mt-6">
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                  <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                </div>
-              </div>
-
-              <div className="mt-6">
                 <button
                   type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={loading}
-                  className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  <FcGoogle className="h-5 w-5 mr-2" />
-                  {loading ? "Signing in..." : "Sign in with Google"}
+                  {showPassword ? (
+                    <EyeSlashIcon className="h-5 w-5 text-gray-500" />
+                  ) : (
+                    <EyeIcon className="h-5 w-5 text-gray-500" />
+                  )}
                 </button>
               </div>
             </div>
+
+            <div className="form-control mt-6">
+              <button className="btn btn-primary" disabled={loading}>
+                {loading ? <span className="loading loading-spinner"></span> : 'Login'}
+              </button>
+            </div>
+
+            <div className="divider">OR</div>
+
+            <div className="form-control">
+              <button
+                type="button"
+                className="btn btn-outline btn-primary"
+                onClick={handleGoogleLogin}
+                disabled={loading}
+              >
+                {loading ? <span className="loading loading-spinner"></span> : 'Login with Google'}
+              </button>
+            </div>
+
+            <p className="text-center mt-2">
+              Don’t have an account?{' '}
+              <Link to="/register" className="link link-primary">
+                Sign up
+              </Link>
+            </p>
           </form>
         </div>
       </div>

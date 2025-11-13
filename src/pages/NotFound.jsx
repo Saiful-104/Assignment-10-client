@@ -1,19 +1,18 @@
-import React from "react";
+// src/pages/NotFound.jsx
 import { Link } from "react-router-dom";
-import { HomeIcon } from "@heroicons/react/24/outline";
 
 const NotFound = () => {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-base-200">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-purple-400 to-indigo-600">
       <div className="text-center">
-        <h1 className="text-9xl font-bold text-primary">404</h1>
-        <h2 className="text-3xl font-semibold mt-4 mb-2">Oops! Page Not Found</h2>
-        <p className="text-lg mb-8 max-w-md mx-auto">
-          The page you are looking for might have been removed, had its name changed, or is temporarily unavailable.
-        </p>
-        <Link to="/" className="btn btn-primary">
-          <HomeIcon className="w-5 h-5 mr-2" />
-          Back to Home
+        <h1 className="text-9xl font-bold text-white mb-4">404</h1>
+        <h2 className="text-3xl font-semibold text-white mb-4">Oops! Page Not Found</h2>
+        <p className="text-xl text-white mb-8">The artwork you're looking for seems to have vanished into thin air.</p>
+        <Link
+          to="/"
+          className="bg-white text-indigo-600 px-6 py-3 rounded-full font-semibold hover:bg-gray-100 transition duration-300"
+        >
+          Go Back Home
         </Link>
       </div>
     </div>
