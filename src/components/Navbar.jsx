@@ -70,9 +70,13 @@ const Navbar = () => {
           {/* User / Auth buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {currentUser ? (
-              <div className="relative">
+              <div
+                className="relative"
+                onMouseLeave={() => setShowDropdown(false)}
+              >
                 <button
-                  onClick={() => setShowDropdown(!showDropdown)}
+                  onClick={() => setShowDropdown((prev) => !prev)}
+                  onMouseEnter={() => setShowDropdown(true)}
                   className="flex items-center focus:outline-none"
                 >
                   <img
@@ -140,11 +144,11 @@ const Navbar = () => {
               Home
             </NavLink>
             <NavLink
-              to="/explore"
+              to="/AllArtworks"
               className={navLinkClass}
               onClick={() => setIsOpen(false)}
             >
-              Explore
+              AllArtworks
             </NavLink>
 
             {currentUser && (

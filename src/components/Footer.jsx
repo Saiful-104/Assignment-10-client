@@ -1,5 +1,6 @@
 // src/components/Footer.jsx
-import { FaFacebook, FaTwitter, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaFacebook, FaInstagram, FaLinkedin } from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
 
 const Footer = () => {
   return (
@@ -9,14 +10,17 @@ const Footer = () => {
           <div>
             <h3 className="text-xl font-bold mb-4">Artify</h3>
             <p className="text-gray-300">
-              Discover, share, and showcase amazing artworks from talented artists around the world.
+              Discover, share, and showcase amazing artworks from talented
+              artists around the world.
             </p>
           </div>
           <div>
             <h3 className="text-xl font-bold mb-4">Contact Us</h3>
             <p className="text-gray-300">
-              Email: info@artify.com<br />
-              Phone: (123) 456-7890<br />
+              Email: info@artify.com
+              <br />
+              Phone: (123) 456-7890
+              <br />
               Address: 123 Art Street, Creative City, 12345
             </p>
           </div>
@@ -27,7 +31,7 @@ const Footer = () => {
                 <FaFacebook size={24} />
               </a>
               <a href="#" className="text-gray-300 hover:text-white">
-                <FaTwitter size={24} />
+                <FaXTwitter size={24} />
               </a>
               <a href="#" className="text-gray-300 hover:text-white">
                 <FaInstagram size={24} />
