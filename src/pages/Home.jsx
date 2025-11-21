@@ -1,7 +1,6 @@
-
+// src/components/Home.jsx
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
 const Home = () => {
   const [featuredArtworks, setFeaturedArtworks] = useState([]);
@@ -33,102 +32,38 @@ const Home = () => {
     },
   ];
 
+  // Fetch latest artworks
   useEffect(() => {
     const fetchFeaturedArtworks = async () => {
       try {
-        const artworksQuery = query(
-          collection(db, "artworks"),
-          orderBy("createdAt", "desc"),
-          limit(6)
-        );
-        const querySnapshot = await getDocs(artworksQuery);
-        const artworks = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFeaturedArtworks(artworks);
+        const res = await fetch("http://localhost:3000/latest-artworks");
+        const data = await res.json();
+        setFeaturedArtworks(data);
       } catch (error) {
-        console.error("Error fetching featured artworks:", error);
-        // Use dummy data if Firebase is not set up
-        setFeaturedArtworks([
-          {
-            id: 1,
-            title: "Sunset Dreams",
-            artistName: "Jane Doe",
-            category: "Landscape",
-            imageUrl: "https://picsum.photos/seed/art1/300/400.jpg",
-          },
-          {
-            id: 2,
-            title: "Urban Chaos",
-            artistName: "John Smith",
-            category: "Abstract",
-            imageUrl: "https://picsum.photos/seed/art2/300/400.jpg",
-          },
-          {
-            id: 3,
-            title: "Nature's Beauty",
-            artistName: "Emily Johnson",
-            category: "Nature",
-            imageUrl: "https://picsum.photos/seed/art3/300/400.jpg",
-          },
-          {
-            id: 4,
-            title: "Digital Dreams",
-            artistName: "Michael Brown",
-            category: "Digital",
-            imageUrl: "https://picsum.photos/seed/art4/300/400.jpg",
-          },
-          {
-            id: 5,
-            title: "Portrait of Time",
-            artistName: "Sarah Wilson",
-            category: "Portrait",
-            imageUrl: "https://picsum.photos/seed/art5/300/400.jpg",
-          },
-          {
-            id: 6,
-            title: "Abstract Thoughts",
-            artistName: "David Lee",
-            category: "Abstract",
-            imageUrl: "https://picsum.photos/seed/art6/300/400.jpg",
-          },
-        ]);
+        console.error("Error fetching latest artworks:", error);
       }
     };
 
     const fetchTopArtists = async () => {
-      // Dummy data for top artists
-      setTopArtists([
-        {
-          id: 1,
-          name: "Jane Doe",
-          avatar: "https://picsum.photos/seed/artist1/100/100.jpg",
-          followers: 1234,
-        },
-        {
-          id: 2,
-          name: "John Smith",
-          avatar: "https://picsum.photos/seed/artist2/100/100.jpg",
-          followers: 987,
-        },
-        {
-          id: 3,
-          name: "Emily Johnson",
-          avatar: "https://picsum.photos/seed/artist3/100/100.jpg",
-          followers: 856,
-        },
-        {
-          id: 4,
-          name: "Michael Brown",
-          avatar: "https://picsum.photos/seed/artist4/100/100.jpg",
-          followers: 743,
-        },
-      ]);
+      try {
+        const res = await fetch("http://localhost:3000/top-artists");
+        const data = await res.json();
+        // Map to frontend format
+        setTopArtists(
+          data.map((artist, index) => ({
+            id: index,
+            name: artist._id,
+            avatar: `https://picsum.photos/seed/artist${index + 1}/100/100.jpg`,
+            followers: artist.count,
+          }))
+        );
+      } catch (error) {
+        console.error("Error fetching top artists:", error);
+      }
     };
 
-    const fetchCommunityHighlights = async () => {
-      // Dummy data for community highlights
+    // Community highlights (dummy data)
+    const fetchCommunityHighlights = () => {
       setCommunityHighlights([
         {
           id: 1,
@@ -152,6 +87,7 @@ const Home = () => {
     fetchCommunityHighlights();
   }, []);
 
+  // Slider auto-change
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
@@ -204,7 +140,7 @@ const Home = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {featuredArtworks.map((artwork) => (
             <div
-              key={artwork.id}
+              key={artwork._id}
               className="bg-white rounded-lg shadow-md overflow-hidden"
             >
               <img
@@ -219,7 +155,7 @@ const Home = () => {
                 <p className="text-gray-600 mb-1">by {artwork.artistName}</p>
                 <p className="text-gray-500 text-sm mb-4">{artwork.category}</p>
                 <Link
-                  to={`/artwork/${artwork.id}`}
+                  to={`/artwork/${artwork._id}`}
                   className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300"
                 >
                   View Details
@@ -250,9 +186,9 @@ const Home = () => {
                 <h3 className="text-lg font-semibold text-gray-800">
                   {artist.name}
                 </h3>
-                <p className="text-gray-600">{artist.followers} followers</p>
+                <p className="text-gray-600">{artist.followers} artworks</p>
                 <Link
-                  to={`/artist/${artist.id}`}
+                  to={`/artist/${artist.name}`}
                   className="mt-4 inline-block text-indigo-600 hover:text-indigo-800"
                 >
                   View Profile

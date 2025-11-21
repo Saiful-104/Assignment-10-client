@@ -21,6 +21,8 @@ const Login = () => {
     }
   }, [currentUser, navigate]);
 
+  if (loading) return <div className="text-center mt-10">Loading...</div>;
+
   // Email/password login
   const handleSubmit = async (e) => {
     e.preventDefault();

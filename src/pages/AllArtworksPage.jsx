@@ -42,10 +42,11 @@ export default function AllArtworksPage() {
   }, []); // The empty array [] means this runs once when the component loads
 
   // This filter logic now runs on the REAL data from your API
-  const filteredArtworks = artworks.filter(art =>
-    art.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    art.artistName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+const filteredArtworks = artworks.filter(art =>
+  (art.title?.toLowerCase() || "").includes(searchTerm.toLowerCase()) ||
+  (art.artistName?.toLowerCase() || "").includes(searchTerm.toLowerCase())
+);
+
 
   // 5. Add loading and error messages
   if (isLoading) {

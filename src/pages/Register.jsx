@@ -21,6 +21,9 @@ const Register = () => {
     }
   }, [currentUser, navigate]);
 
+  if (loading) return <div className="text-center mt-10">Loading...</div>;
+
+
   const validatePassword = (password) => {
     if (password.length < 6) {
       return 'Password must be at least 6 characters';
