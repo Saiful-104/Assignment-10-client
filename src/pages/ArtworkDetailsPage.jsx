@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { Heart, Star } from "lucide-react";
 import { AuthContext } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function ArtworkDetailsPage() {
   const { id } = useParams();
@@ -12,28 +13,29 @@ export default function ArtworkDetailsPage() {
   const [error, setError] = useState(null);
 
   const { currentUser } = useContext(AuthContext);
-  const user=currentUser
+  const user = currentUser;
 
-  // artwork details from backend
+  // Fetch artwork details
   useEffect(() => {
     const fetchArtwork = async () => {
       try {
         setLoading(true);
-      
-        const res = await fetch(`http://localhost:3000/artworks/${id}`,{
-          headers:{
-            Authorization:user?.accessToken ? `Bearer ${user.accessToken}` : "",
+
+        const res = await fetch(`http://localhost:3000/artworks/${id}`, {
+          headers: {
+            Authorization: user?.accessToken
+              ? `Bearer ${user.accessToken}`
+              : "",
           },
         });
- 
+
         const data = await res.json();
-        console.log("Fetched data:", data); // Debug log
 
         if (data.success) {
           setArtwork(data.result);
-          setIsLiked(data.result.liked );
-          setIsFavorited(data.result.favorited );
-        } 
+          setIsLiked(data.result.liked);
+          setIsFavorited(data.result.favorited);
+        }
       } catch (err) {
         console.error("Failed to fetch artwork:", err);
         setError(err.message);
@@ -42,14 +44,13 @@ export default function ArtworkDetailsPage() {
       }
     };
 
-      fetchArtwork();
-    
-  }, [id,user]);
+    fetchArtwork();
+  }, [id, user]);
 
   // Handle Like toggle
   const handleLike = async () => {
     if (!user || !user.accessToken) {
-      alert("Please login to like artworks");
+      toast.error("Please login to like artworks");
       return;
     }
 
@@ -59,59 +60,75 @@ export default function ArtworkDetailsPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.accessToken}`,
-         // console.log({Authorization})
         },
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        throw new Error("Failed to like artwork");
+        throw new Error(data.message || "Failed to like artwork");
       }
 
-      const data = await res.json();
       if (data.success) {
         setIsLiked(data.liked);
         setArtwork((prev) => ({
           ...prev,
           likes: prev.likes + (data.liked ? 1 : -1),
         }));
+
+        if (data.liked) {
+          toast.success("Liked successfully!");
+        } else {
+          toast("Like removed");
+        }
       }
     } catch (err) {
       console.error("Error liking artwork:", err);
-      alert("Failed to like artwork");
+      toast.error("Failed to like artwork");
     }
   };
 
   // Handle Favorite toggle
   const handleFavorite = async () => {
     if (!user || !user.accessToken) {
-      alert("Please login to favorite artworks");
+      toast.error("Please login to favorite artworks");
       return;
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/artworks/${id}/favorite`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.accessToken}`,
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error("Failed to favorite artwork");
-      }
+      const res = await fetch(
+        `http://localhost:3000/artworks/${id}/favorite`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        }
+      );
 
       const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to favorite artwork");
+      }
+
       if (data.success) {
         setIsFavorited(data.favorited);
+
+        if (data.favorited) {
+          toast.success("Added to favorites!");
+        } else {
+          toast("Removed from favorites");
+        }
       }
     } catch (err) {
       console.error("Error favoriting artwork:", err);
-      alert("Failed to favorite artwork");
+      toast.error("Failed to favorite artwork");
     }
   };
 
-  // ✅ FIX 4: Better loading state
+  // Loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -123,7 +140,7 @@ export default function ArtworkDetailsPage() {
     );
   }
 
-  // ✅ FIX 5: Show error state
+  // Error UI
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -140,7 +157,7 @@ export default function ArtworkDetailsPage() {
     );
   }
 
-  // ✅ FIX 6: Check if artwork exists
+  // Artwork not found
   if (!artwork) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -165,13 +182,16 @@ export default function ArtworkDetailsPage() {
             <h1 className="text-4xl text-blue-950 font-bold mb-2">
               {artwork.title}
             </h1>
-            <p className="text-gray-600 text-lg mb-4">by {artwork.artistName}</p>
+            <p className="text-gray-600 text-lg mb-4">
+              by {artwork.artistName}
+            </p>
             <p className="text-gray-700 mb-4">
               <strong>Medium:</strong> {artwork.medium}
             </p>
             <p className="text-gray-700 mb-6">{artwork.description}</p>
 
             <div className="flex gap-3">
+              {/* Like Button */}
               <button
                 onClick={handleLike}
                 className={`flex-1 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
@@ -184,6 +204,7 @@ export default function ArtworkDetailsPage() {
                 {isLiked ? "Liked" : "Like"} ({artwork.likes || 0})
               </button>
 
+              {/* Favorite Button */}
               <button
                 onClick={handleFavorite}
                 className={`flex-1 py-4 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all ${
@@ -209,7 +230,9 @@ export default function ArtworkDetailsPage() {
               e.target.src = "https://via.placeholder.com/150";
             }}
           />
-          <h4 className="text-blue-600 text-2xl font-bold mb-2">{artwork.artistName}</h4>
+          <h4 className="text-blue-600 text-2xl font-bold mb-2">
+            {artwork.artistName}
+          </h4>
           <p className="text-gray-700 mb-4">
             Total Artworks: {artwork.artistTotalArtworks || 0}
           </p>

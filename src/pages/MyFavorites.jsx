@@ -88,7 +88,7 @@ export default function MyFavoritesPage() {
   };
 
   const handleViewArtwork = (artworkId) => {
-    navigate(`/artworks/${artworkId}`);
+    navigate(`/details/${artworkId}`);
   };
 
   if (!currentUser) {
@@ -179,7 +179,7 @@ export default function MyFavoritesPage() {
                   <button
                     onClick={() => handleViewArtwork(art._id)}
                     className="w-full mt-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                  >
+                        >
                     View Details
                   </button>
                 </div>

@@ -155,7 +155,7 @@ const Home = () => {
                 <p className="text-gray-600 mb-1">by {artwork.artistName}</p>
                 <p className="text-gray-500 text-sm mb-4">{artwork.category}</p>
                 <Link
-                  to={`/artwork/${artwork._id}`}
+                  to={`/details/${artwork._id}`}
                   className="inline-block bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition duration-300"
                 >
                   View Details
