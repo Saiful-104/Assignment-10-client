@@ -31,7 +31,7 @@ export default function AddArtworkPage() {
 
       const artworkData ={
         ...formData,
-         userName: currentUser.name,
+         userName: currentUser.displayName,
     userEmail: currentUser.email,
     createdAt: new Date().toISOString(),
 
@@ -63,7 +63,7 @@ export default function AddArtworkPage() {
         visibility: "public",
       });
 
-      setTimeout(() => setShowToast(false), 3000);
+      setTimeout(() => setShowToast(false), 2500);
     } else {
       console.error("Failed to add artwork");
     }

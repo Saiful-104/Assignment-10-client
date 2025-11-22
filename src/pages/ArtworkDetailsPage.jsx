@@ -202,8 +202,7 @@ export default function ArtworkDetailsPage() {
         {/* Artist Info */}
         <div className="bg-white rounded-3xl shadow-2xl p-6 text-center">
           <img
-            src={artwork.imageUrl
- || "https://via.placeholder.com/150"}
+            src={artwork.imageUrl || "https://via.placeholder.com/150"}
             alt={artwork.artistName}
             className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-purple-100 object-cover"
             onError={(e) => {
