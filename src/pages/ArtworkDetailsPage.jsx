@@ -11,23 +11,28 @@ export default function ArtworkDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const { user } = useContext(AuthContext);
+  const { currentUser } = useContext(AuthContext);
+  const user=currentUser
 
   // artwork details from backend
   useEffect(() => {
     const fetchArtwork = async () => {
       try {
         setLoading(true);
-        setError(null);
-        const res = await fetch(`http://localhost:3000/artworks/${id}`);
+      
+        const res = await fetch(`http://localhost:3000/artworks/${id}`,{
+          headers:{
+            Authorization:user?.accessToken ? `Bearer ${user.accessToken}` : "",
+          },
+        });
  
         const data = await res.json();
         console.log("Fetched data:", data); // Debug log
 
         if (data.success) {
           setArtwork(data.result);
-          setIsLiked(data.result.liked || false);
-          setIsFavorited(data.result.favorited || false);
+          setIsLiked(data.result.liked );
+          setIsFavorited(data.result.favorited );
         } 
       } catch (err) {
         console.error("Failed to fetch artwork:", err);
@@ -37,10 +42,8 @@ export default function ArtworkDetailsPage() {
       }
     };
 
-    // Only fetch if we have an ID
-    if (id) {
       fetchArtwork();
-    }
+    
   }, [id,user]);
 
   // Handle Like toggle
@@ -56,6 +59,7 @@ export default function ArtworkDetailsPage() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${user.accessToken}`,
+         // console.log({Authorization})
         },
       });
 
@@ -198,15 +202,16 @@ export default function ArtworkDetailsPage() {
         {/* Artist Info */}
         <div className="bg-white rounded-3xl shadow-2xl p-6 text-center">
           <img
-            src={artwork.artistPhoto || "https://via.placeholder.com/150"}
+            src={artwork.imageUrl
+ || "https://via.placeholder.com/150"}
             alt={artwork.artistName}
             className="w-32 h-32 rounded-full mx-auto mb-4 border-4 border-purple-100 object-cover"
             onError={(e) => {
               e.target.src = "https://via.placeholder.com/150";
             }}
           />
-          <h4 className="text-2xl font-bold mb-2">{artwork.artistName}</h4>
-          <p className="text-gray-600 mb-4">
+          <h4 className="text-blue-600 text-2xl font-bold mb-2">{artwork.artistName}</h4>
+          <p className="text-gray-700 mb-4">
             Total Artworks: {artwork.artistTotalArtworks || 0}
           </p>
         </div>

@@ -1,47 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Edit2, Trash2, X, Check } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Await } from 'react-router';
 
 export default function MyGalleryPage() {
-  // Logged-in user
-  const currentUser = {
-    id: 1,
-    name: "Sarah Anderson",
-    email: "sarah.anderson@email.com"
-  };
-
-  // Initial artworks
-  const initialArtworks = [
-    {
-      id: 1,
-      imageUrl: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5',
-      title: 'Sunset Dreams',
-      category: 'painting',
-      medium: 'Oil on Canvas',
-      description: 'A vibrant sunset over the ocean',
-      dimensions: '36 x 48 inches',
-      price: '1200',
-      visibility: 'public',
-      userName: 'Sarah Anderson',
-      userEmail: 'sarah.anderson@email.com',
-      likes: 245,
-      views: 1823
-    },
-    {
-      id: 2,
-      imageUrl: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968',
-      title: 'Abstract Emotions',
-      category: 'mixed media',
-      medium: 'Acrylic and Collage',
-      description: 'Exploring human emotions through color',
-      dimensions: '24 x 30 inches',
-      price: '950',
-      visibility: 'public',
-      userName: 'Sarah Anderson',
-      userEmail: 'sarah.anderson@email.com',
-      likes: 167,
-      views: 892
-    }
-  ];
+ 
+  const {currentUser}=useAuth();
 
   const [artworks, setArtworks] = useState([]);
   const [selectedArtwork, setSelectedArtwork] = useState(null);
@@ -59,6 +23,11 @@ export default function MyGalleryPage() {
     visibility: 'public'
   });
 
+  const showToast =(msg)=>{
+    setToast({ show: true, message: msg });
+    setTimeout(() => setToast({ show: false, message: '' }), 2500);
+  }
+
   // Load artworks
   useEffect(() => {
     const saved = localStorage.getItem('userArtworks');
@@ -70,9 +39,25 @@ export default function MyGalleryPage() {
   }, []);
 
   // Persist
-  useEffect(() => {
-    localStorage.setItem('userArtworks', JSON.stringify(artworks));
-  }, [artworks]);
+   useEffect(()=>{
+     const myArtworks= async()=>{
+      if(!currentUser){
+        return;
+      }
+   const token = await currentUser.getIdToken();
+   //console.log("User Token:", token);
+   const res = await fetch('http://localhost:3000/my-artworks', {
+     headers: {
+       'Authorization': `Bearer ${token}`
+
+     }
+    });
+    const data = await res.json();
+    console.log("Fetched My Artworks:", data);
+    setArtworks(data);
+  }
+  myArtworks();
+   },[currentUser]) 
 
   const openUpdateModal = (art) => {
     setSelectedArtwork(art);
@@ -85,13 +70,28 @@ export default function MyGalleryPage() {
     setSelectedArtwork(null);
   };
 
-  const handleUpdate = () => {
-    setArtworks(prev =>
-      prev.map(a => (a.id === selectedArtwork.id ? { ...selectedArtwork, ...formData } : a))
-    );
-    showToastNotification('Artwork updated successfully!');
-    closeUpdateModal();
-  };
+    const handleUpdate = async () => {
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`http://localhost:3000/artworks/${selectedArtwork._id}`, {
+      method:"PUT",
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(formData)
+    });
+    const data = await res.json();
+    if(data.success){
+      setArtworks(prev => prev.map(art => art._id === selectedArtwork._id ? {...art, ...formData} : art));
+      showToast('Artwork updated successfully!');
+      closeUpdateModal();
+    }
+  } catch(err){
+    console.log(err);
+  }
+};
+
 
   const openDeleteModal = (art) => {
     setSelectedArtwork(art);
@@ -103,11 +103,26 @@ export default function MyGalleryPage() {
     setSelectedArtwork(null);
   };
 
-  const handleDelete = () => {
-    setArtworks(prev => prev.filter(a => a.id !== selectedArtwork.id));
-    showToastNotification('Artwork deleted successfully!');
-    closeDeleteModal();
-  };
+    const handleDelete = async () => {
+  try {
+    const token = await currentUser.getIdToken();
+    const res = await fetch(`http://localhost:3000/artworks/${selectedArtwork._id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    if(data.success){
+      setArtworks(prev => prev.filter(a => a._id !== selectedArtwork._id));
+      showToast('Artwork deleted successfully!');
+      closeDeleteModal();
+    }
+  } catch(err) {
+    console.log(err);
+  }
+};
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;

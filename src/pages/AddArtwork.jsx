@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import { Upload, Check, X } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 
 export default function AddArtworkPage() {
-  const currentUser = {
-    name: "Sarah Anderson",
-    email: "sarah.anderson@email.com",
-  };
+   const {currentUser}= useAuth();
 
   const [formData, setFormData] = useState({
     imageUrl: "",
@@ -181,7 +179,7 @@ export default function AddArtworkPage() {
 
           {/* User Info */}
           <div className= "  text-gray-800 bg-gray-50 p-4 rounded-xl border">
-            <p><strong>Name:</strong> {currentUser.name}</p>
+            <p><strong>Name:</strong> {currentUser.displayName}</p>
             <p><strong>Email:</strong> {currentUser.email}</p>
           </div>
 
