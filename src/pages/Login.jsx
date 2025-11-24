@@ -1,4 +1,4 @@
-// src/pages/Login.jsx
+
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -29,7 +29,7 @@ const Login = () => {
     setLoading(true);
     try {
       await loginWithEmail(email, password);
-      toast.success('Logged in successfully!');
+     // toast.success('Logged in successfully!');
       navigate('/');
     } catch (error) {
       console.error(error);
@@ -44,7 +44,7 @@ const Login = () => {
     setLoading(true);
     try {
       await loginWithGoogle();
-      toast.success('Logged in successfully!');
+      //toast.success('Logged in successfully!');
       navigate('/');
     } catch (error) {
       console.error(error);

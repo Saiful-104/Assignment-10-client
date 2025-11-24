@@ -26,16 +26,19 @@ export default function AddArtworkPage() {
     }));
   };
 
-     const handleSubmit = async(e)=>{
-      e.preventDefault();
+ const handleSubmit = async(e)=>{
+  e.preventDefault();
 
-      const artworkData ={
-        ...formData,
-         userName: currentUser.displayName,
+  const artworkData = {
+    ...formData,
+    artistName: currentUser.displayName, 
     userEmail: currentUser.email,
+    userId: currentUser.uid,              
+    likes: 0,                              
+    visibility: formData.visibility.charAt(0).toUpperCase() + formData.visibility.slice(1), 
     createdAt: new Date().toISOString(),
-
-      };
+    updatedAt: new Date().toISOString(), 
+  };
        try {
     const res = await fetch("http://localhost:3000/artworks", {
       method: "POST",
@@ -178,10 +181,10 @@ export default function AddArtworkPage() {
           </div>
 
           {/* User Info */}
-          <div className= "  text-gray-800 bg-gray-50 p-4 rounded-xl border">
-            <p><strong>Name:</strong> {currentUser.displayName}</p>
-            <p><strong>Email:</strong> {currentUser.email}</p>
-          </div>
+         <div className="text-gray-800 bg-gray-50 p-4 rounded-xl border">
+  <p><strong>Artist Name:</strong> {currentUser.displayName}</p>
+  <p><strong>Email:</strong> {currentUser.email}</p>
+</div>
 
           {/* Submit Button */}
           <button
