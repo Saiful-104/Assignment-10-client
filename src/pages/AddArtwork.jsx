@@ -3,7 +3,7 @@ import { Upload, Check, X } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function AddArtworkPage() {
-   const {currentUser}= useAuth();
+  const { currentUser } = useAuth();
 
   const [formData, setFormData] = useState({
     imageUrl: "",
@@ -26,59 +26,66 @@ export default function AddArtworkPage() {
     }));
   };
 
- const handleSubmit = async(e)=>{
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const artworkData = {
-    ...formData,
-    artistName: currentUser.displayName, 
-    userEmail: currentUser.email,
-    userId: currentUser.uid,              
-    likes: 0,                              
-    visibility: formData.visibility.charAt(0).toUpperCase() + formData.visibility.slice(1), 
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(), 
-  };
-       try {
-    const res = await fetch("http://localhost:3000/artworks", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(artworkData),
-    });
+    const artworkData = {
+      ...formData,
+      artistName: currentUser.displayName,
+      userEmail: currentUser.email,
+      userId: currentUser.uid,
+      likes: 0,
+      visibility:
+        formData.visibility.charAt(0).toUpperCase() +
+        formData.visibility.slice(1),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    try {
+      const res = await fetch(
+        "https://assingnment-10-server.vercel.app/artworks",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(artworkData),
+        }
+      );
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (data.success) {
-      console.log("Artwork added:", data.result);
-      setShowToast(true);
+      if (data.success) {
+        console.log("Artwork added:", data.result);
+        setShowToast(true);
 
-      // Reset form
-      setFormData({
-        imageUrl: "",
-        title: "",
-        category: "",
-        medium: "",
-        description: "",
-        dimensions: "",
-        price: "",
-        visibility: "public",
-      });
+        // Reset form
+        setFormData({
+          imageUrl: "",
+          title: "",
+          category: "",
+          medium: "",
+          description: "",
+          dimensions: "",
+          price: "",
+          visibility: "public",
+        });
 
-      setTimeout(() => setShowToast(false), 2500);
-    } else {
-      console.error("Failed to add artwork");
+        setTimeout(() => setShowToast(false), 2500);
+      } else {
+        console.error("Failed to add artwork");
+      }
+    } catch (error) {
+      console.error("Error:", error);
     }
-  } catch (error) {
-    console.error("Error:", error);
-  }
-     }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-10 px-4">
       <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-md p-8">
-        <h1 className="text-3xl font-bold mb-6 text-gray-800">Add New Artwork</h1>
+        <h1 className="text-3xl font-bold mb-6 text-gray-800">
+          Add New Artwork
+        </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Image URL */}
@@ -181,10 +188,14 @@ export default function AddArtworkPage() {
           </div>
 
           {/* User Info */}
-         <div className="text-gray-800 bg-gray-50 p-4 rounded-xl border">
-  <p><strong>Artist Name:</strong> {currentUser.displayName}</p>
-  <p><strong>Email:</strong> {currentUser.email}</p>
-</div>
+          <div className="text-gray-800 bg-gray-50 p-4 rounded-xl border">
+            <p>
+              <strong>Artist Name:</strong> {currentUser.displayName}
+            </p>
+            <p>
+              <strong>Email:</strong> {currentUser.email}
+            </p>
+          </div>
 
           {/* Submit Button */}
           <button

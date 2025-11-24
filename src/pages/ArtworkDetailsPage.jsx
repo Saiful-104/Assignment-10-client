@@ -21,13 +21,16 @@ export default function ArtworkDetailsPage() {
       try {
         setLoading(true);
 
-        const res = await fetch(`http://localhost:3000/artworks/${id}`, {
-          headers: {
-            Authorization: user?.accessToken
-              ? `Bearer ${user.accessToken}`
-              : "",
-          },
-        });
+        const res = await fetch(
+          `https://assingnment-10-server.vercel.app/artworks/${id}`,
+          {
+            headers: {
+              Authorization: user?.accessToken
+                ? `Bearer ${user.accessToken}`
+                : "",
+            },
+          }
+        );
 
         const data = await res.json();
 
@@ -55,13 +58,16 @@ export default function ArtworkDetailsPage() {
     }
 
     try {
-      const res = await fetch(`http://localhost:3000/artworks/${id}/like`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.accessToken}`,
-        },
-      });
+      const res = await fetch(
+        `https://assingnment-10-server.vercel.app/artworks/${id}/like`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.accessToken}`,
+          },
+        }
+      );
 
       const data = await res.json();
 
@@ -97,7 +103,7 @@ export default function ArtworkDetailsPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:3000/artworks/${id}/favorite`,
+        `https://assingnment-10-server.vercel.app/artworks/${id}/favorite`,
         {
           method: "POST",
           headers: {

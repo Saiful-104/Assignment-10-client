@@ -1,40 +1,43 @@
-import React, { useState, useEffect } from 'react';
-import { Star, Trash2, Heart, Loader } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { Star, Trash2, Heart, Loader } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function MyFavoritesPage() {
   const { currentUser } = useAuth();
   const navigate = useNavigate();
-  
+
   const [favorites, setFavorites] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [artworkToRemove, setArtworkToRemove] = useState(null);
   const [loading, setLoading] = useState(false);
   const [removing, setRemoving] = useState(false);
-  const [toast, setToast] = useState({ show: false, message: '' });
+  const [toast, setToast] = useState({ show: false, message: "" });
 
   const showToast = (msg) => {
     setToast({ show: true, message: msg });
-    setTimeout(() => setToast({ show: false, message: '' }), 2500);
+    setTimeout(() => setToast({ show: false, message: "" }), 2500);
   };
 
   // Fetch favorites from backend
   useEffect(() => {
     const fetchFavorites = async () => {
       if (!currentUser) return;
-      
+
       try {
         setLoading(true);
         const token = await currentUser.getIdToken();
-        const res = await fetch('http://localhost:3000/my-favorites', {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+        const res = await fetch(
+          "https://assingnment-10-server.vercel.app/my-favorites",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
         if (!res.ok) {
-          throw new Error('Failed to fetch favorites');
+          throw new Error("Failed to fetch favorites");
         }
 
         const data = await res.json();
@@ -61,21 +64,26 @@ export default function MyFavoritesPage() {
     setRemoving(true);
     try {
       const token = await currentUser.getIdToken();
-      const res = await fetch(`http://localhost:3000/my-favorites/${artworkToRemove._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const res = await fetch(
+        `https://assingnment-10-server.vercel.app/my-favorites/${artworkToRemove._id}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       const data = await res.json();
 
       if (data.success) {
         // Remove from local state
-        setFavorites(prev => prev.filter(art => art._id !== artworkToRemove._id));
-        showToast('Removed from favorites');
+        setFavorites((prev) =>
+          prev.filter((art) => art._id !== artworkToRemove._id)
+        );
+        showToast("Removed from favorites");
       } else {
-        showToast(data.message || 'Failed to remove favorite');
+        showToast(data.message || "Failed to remove favorite");
       }
     } catch (error) {
       console.error("Error removing favorite:", error);
@@ -120,7 +128,7 @@ export default function MyFavoritesPage() {
               Start exploring artworks and add them to your favorites!
             </p>
             <button
-              onClick={() => navigate('/artworks')}
+              onClick={() => navigate("/artworks")}
               className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
             >
               Browse Artworks
@@ -128,9 +136,9 @@ export default function MyFavoritesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {favorites.map(art => (
-              <div 
-                key={art._id} 
+            {favorites.map((art) => (
+              <div
+                key={art._id}
                 className="bg-white rounded-xl shadow-md hover:shadow-xl transition overflow-hidden relative group"
               >
                 {/* Remove button */}
@@ -143,35 +151,40 @@ export default function MyFavoritesPage() {
                 </button>
 
                 {/* Artwork image - clickable */}
-                <div 
+                <div
                   onClick={() => handleViewArtwork(art._id)}
                   className="cursor-pointer overflow-hidden"
                 >
-                  <img 
-                    src={art.imageUrl} 
-                    alt={art.title} 
+                  <img
+                    src={art.imageUrl}
+                    alt={art.title}
                     className="w-full h-56 object-cover hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x300?text=Image+Not+Found';
+                      e.target.src =
+                        "https://via.placeholder.com/400x300?text=Image+Not+Found";
                     }}
                   />
                 </div>
 
                 {/* Artwork details */}
                 <div className="p-4">
-                  <h3 
+                  <h3
                     onClick={() => handleViewArtwork(art._id)}
                     className="font-bold text-gray-800 text-lg mb-1 hover:text-blue-600 cursor-pointer truncate"
                   >
                     {art.title}
                   </h3>
-                  <p className="text-gray-600 text-sm mb-2">by {art.artistName || 'Unknown Artist'}</p>
-                  
+                  <p className="text-gray-600 text-sm mb-2">
+                    by {art.artistName || "Unknown Artist"}
+                  </p>
+
                   {/* Additional info */}
                   <div className="flex items-center justify-between text-sm text-gray-500 pt-2 border-t">
-                    <span>{art.medium || 'Mixed Media'}</span>
+                    <span>{art.medium || "Mixed Media"}</span>
                     {art.price > 0 && (
-                      <span className="text-green-600 font-semibold">${art.price}</span>
+                      <span className="text-green-600 font-semibold">
+                        ${art.price}
+                      </span>
                     )}
                   </div>
 
@@ -179,7 +192,7 @@ export default function MyFavoritesPage() {
                   <button
                     onClick={() => handleViewArtwork(art._id)}
                     className="w-full mt-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                        >
+                  >
                     View Details
                   </button>
                 </div>
@@ -196,11 +209,14 @@ export default function MyFavoritesPage() {
                 <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
                   <Trash2 className="w-6 h-6 text-red-600" />
                 </div>
-                <h3 className="text-xl text-gray-800 font-bold">Remove from Favorites?</h3>
+                <h3 className="text-xl text-gray-800 font-bold">
+                  Remove from Favorites?
+                </h3>
               </div>
-              
+
               <p className="text-gray-600 mb-6">
-                Are you sure you want to remove "<strong>{artworkToRemove.title}</strong>" from your favorites?
+                Are you sure you want to remove "
+                <strong>{artworkToRemove.title}</strong>" from your favorites?
               </p>
 
               <div className="flex gap-3">
@@ -219,7 +235,7 @@ export default function MyFavoritesPage() {
                   className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
                   disabled={removing}
                 >
-                  {removing ? 'Removing...' : 'Remove'}
+                  {removing ? "Removing..." : "Remove"}
                 </button>
               </div>
             </div>

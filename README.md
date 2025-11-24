@@ -4,7 +4,7 @@ Artify is a creative artwork sharing platform built with React.
 
 ## 🌐 Live Site
 
-(Add link here)
+https://imaginative-gelato-d4c5f1.netlify.app/
 
 ## ✨ Features
 

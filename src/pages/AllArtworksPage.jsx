@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { Search, Eye, Heart, Filter } from 'lucide-react';
-import { Link } from 'react-router-dom'; 
+import React, { useState, useEffect } from "react";
+import { Search, Eye, Heart, Filter } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function AllArtworksPage() {
   const [artworks, setArtworks] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All'); // ✅ Category state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All"); // ✅ Category state
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // ✅ Category list
   const categories = [
-    'All', 
-    'Abstract', 
-    'Portrait', 
-    'Landscape', 
-    'Digital Art', 
-    'Oil Painting', 
-    'Watercolor', 
-    'Sculpture',
-    'Photography',
-    'Mixed Media'
+    "All",
+    "Abstract",
+    "Portrait",
+    "Landscape",
+    "Digital Art",
+    "Oil Painting",
+    "Watercolor",
+    "Sculpture",
+    "Photography",
+    "Mixed Media",
   ];
 
   // ✅ Fetch artworks with search and category filter
@@ -28,24 +28,25 @@ export default function AllArtworksPage() {
     const fetchArtworks = async () => {
       try {
         setIsLoading(true);
-        
+
         // Build URL with query parameters
-        let url = 'http://localhost:3000/artworks';
+        let url = "https://assingnment-10-server.vercel.app/artworks";
         const params = new URLSearchParams();
-        
-        if (searchTerm) params.append('search', searchTerm);
-        if (selectedCategory !== 'All') params.append('category', selectedCategory);
-        
+
+        if (searchTerm) params.append("search", searchTerm);
+        if (selectedCategory !== "All")
+          params.append("category", selectedCategory);
+
         // Use /search endpoint if filters are applied
         if (params.toString()) {
-          url = `http://localhost:3000/search?${params.toString()}`;
+          url = `https://assingnment-10-server.vercel.app/search?${params.toString()}`;
         }
 
-        console.log('Fetching from:', url); // Debug
+        console.log("Fetching from:", url); // Debug
 
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Data could not be fetched!');
-        
+        if (!response.ok) throw new Error("Data could not be fetched!");
+
         const data = await response.json();
         setArtworks(data);
         setError(null);
@@ -114,17 +115,17 @@ export default function AllArtworksPage() {
               Filter by Category
             </h3>
           </div>
-          
+
           {/* Category Buttons */}
           <div className="flex flex-wrap gap-3">
-            {categories.map(cat => (
+            {categories.map((cat) => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
                 className={`px-5 py-2.5 rounded-full font-medium transition-all duration-300 transform hover:scale-105 ${
                   selectedCategory === cat
-                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700'
+                    ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg"
+                    : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-purple-100 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700"
                 }`}
               >
                 {cat}
@@ -140,12 +141,18 @@ export default function AllArtworksPage() {
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-4 mb-8">
           <div className="flex justify-between items-center">
             <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Showing Results</p>
-              <p className="text-2xl font-bold text-purple-600">{artworks.length}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Showing Results
+              </p>
+              <p className="text-2xl font-bold text-purple-600">
+                {artworks.length}
+              </p>
             </div>
-            {selectedCategory !== 'All' && (
+            {selectedCategory !== "All" && (
               <div className="text-right">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Category</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Category
+                </p>
                 <p className="text-xl font-semibold text-gray-800 dark:text-white">
                   {selectedCategory}
                 </p>
@@ -153,7 +160,9 @@ export default function AllArtworksPage() {
             )}
             {searchTerm && (
               <div className="text-right">
-                <p className="text-sm text-gray-600 dark:text-gray-400">Search</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Search
+                </p>
                 <p className="text-lg font-medium text-gray-800 dark:text-white truncate max-w-[150px]">
                   "{searchTerm}"
                 </p>
@@ -172,11 +181,11 @@ export default function AllArtworksPage() {
             <p className="text-gray-400 dark:text-gray-500 mb-4">
               Try adjusting your search or filter
             </p>
-            {(searchTerm || selectedCategory !== 'All') && (
+            {(searchTerm || selectedCategory !== "All") && (
               <button
                 onClick={() => {
-                  setSearchTerm('');
-                  setSelectedCategory('All');
+                  setSearchTerm("");
+                  setSelectedCategory("All");
                 }}
                 className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition"
               >
@@ -187,8 +196,8 @@ export default function AllArtworksPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {artworks.map((art) => (
-              <div 
-                key={art._id} 
+              <div
+                key={art._id}
                 className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
               >
                 {/* Image with Overlay */}
@@ -198,8 +207,6 @@ export default function AllArtworksPage() {
                     alt={art.title}
                     className="w-full h-56 object-cover"
                   />
-                  
-                 
                 </div>
 
                 <div className="p-5">
@@ -229,7 +236,7 @@ export default function AllArtworksPage() {
                     to={`/details/${art._id}`}
                     className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 hover:from-purple-700 hover:to-blue-700 transition-all duration-300 transform hover:scale-105 font-medium"
                   >
-                    <Eye className="w-5 h-5" /> 
+                    <Eye className="w-5 h-5" />
                     View Details
                   </Link>
                 </div>

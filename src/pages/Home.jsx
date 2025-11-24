@@ -36,7 +36,9 @@ const Home = () => {
   useEffect(() => {
     const fetchFeaturedArtworks = async () => {
       try {
-        const res = await fetch("http://localhost:3000/latest-artworks");
+        const res = await fetch(
+          "https://assingnment-10-server.vercel.app/latest-artworks"
+        );
         const data = await res.json();
         setFeaturedArtworks(data);
       } catch (error) {
@@ -46,7 +48,9 @@ const Home = () => {
 
     const fetchTopArtists = async () => {
       try {
-        const res = await fetch("http://localhost:3000/top-artists");
+        const res = await fetch(
+          "https://assingnment-10-server.vercel.app/top-artists"
+        );
         const data = await res.json();
         // Map to frontend format
         setTopArtists(
